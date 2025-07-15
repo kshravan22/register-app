@@ -7,13 +7,13 @@ pipeline {
     }
 
     stages {
-        stage("cleanup Workspace") {
+        stage("Cleanup Workspace") {
             steps {
                 deleteDir()
             }
         }
 
-        stage("checkout from SCM") {
+        stage("Checkout from SCM") {
             steps {
                 git branch: 'main', credentialsId: 'github', url: 'https://github.com/kshravan22/register-app'
             }
@@ -37,6 +37,14 @@ pipeline {
                     withSonarQubeEnv(credentialsId: 'jenkins-sonarqube-token') {
                         sh "mvn sonar:sonar"
                     }
+                }
+            }
+        }
+
+        stage("Quality Gate") {
+            steps {
+                script {
+                    waitForQualityGate abortPipeline: false, credentialsId: 'jenkins-sonarqube-token'
                 }
             }
         }
